@@ -3,9 +3,6 @@ package main
 import (
     "container/list"
 	"fmt"
-    //"stack" 
-	"math/rand"
-	"time"
 )
 
 type Node struct {
@@ -54,12 +51,6 @@ func Search(root *Node, val int) *Node {
     return nil
 }
 
-var maxSize int = 1000
-
-func value() int {
-	return rand.Intn(maxSize)
-}
-
 func newNode(val int) *Node {
     return &Node{val, nil, nil}
 }
@@ -95,17 +86,7 @@ func makeUniformTree(size int) *Node {
     return root
 }
 
-func makeRandomTree(size int) *Node {
-	root := &Node{value(), nil, nil}
-	current := root
-	for i := 0; i < size; i++ {
-		current.left = &Node{value(), nil, nil}
-		current.right = &Node{value(), nil, nil}
-		current = current.left
-	}
-	return root
-}
-
+/*
 // a very dumb way to print trees
 func printTree(prefix string, root *Node) {
 	fmt.Printf("%s.value = %v\n", prefix, root.value)
@@ -129,6 +110,7 @@ func printTree2_(prefix string, root *Node) {
 		printTree2_(prefix+"  ", root.right)
 	}
 } 
+*/
 
 func printTree3(root *Node) {
     queue := list.New()
@@ -147,21 +129,6 @@ func printTree3(root *Node) {
 }
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
-
-	var root Node = Node{value(), nil, nil}
-	fmt.Printf("Height of tree with one element is %v\n", root.Height())
-
-	root.left = &Node{2, nil, nil}
-	fmt.Printf("Height of tree with two elements is %v\n", root.Height())
-
-	root.right = &Node{2, nil, nil}
-	fmt.Printf("Height of tree with three elements balanced is %v\n", root.Height())
-
-	// printTree2(&root)
-	// printTree2(makeRandomTree(10))
-
-    fmt.Println()
     size := 10
     utree := makeUniformTree(size)
     fmt.Printf("Uniform tree of size %v has height %v\n", size, utree.Height())
