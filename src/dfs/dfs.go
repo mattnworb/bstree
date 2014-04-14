@@ -36,20 +36,19 @@ func Search(root *Node, val int) *Node {
     stack := list.New()
     stack.PushBack(root)
     for stack.Len() > 0 {
-        //pop
-        n := stack.Back()
-        stack.Remove(n)
+        //pop from back of list
+        //does a type assertion at the end
+        node := stack.Remove(stack.Back()).(*Node)
 
-        switch node := n.Value.(type) {
-        case *Node:
-            fmt.Printf("popped node %v from stack\n", node)
-            if node.value == val {
-                return node
-            }
+        //fmt.Printf("popped node %v from stack\n", node)
+        if node.value == val {
+            return node
+        }
+        if node.left != nil {
             stack.PushBack(node.left)
+        }
+        if node.right != nil {
             stack.PushBack(node.right)
-        default:
-            panic("Wrong type in node stack")
         }
     }
     return nil
