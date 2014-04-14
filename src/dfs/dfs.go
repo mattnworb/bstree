@@ -118,7 +118,7 @@ func printTree3(root *Node) {
 
     for queue.Len() > 0 {
         node := queue.Remove(queue.Front()).(*Node)
-        fmt.Printf("value=%v, left=%v, right=%v\n", node.value, node.left, node.right)
+        fmt.Printf("address=%p, value=%v, left=%v, right=%v\n", node, node.value, node.left, node.right)
         if (node.left != nil) {
             queue.PushBack(node.left)
         }
@@ -134,6 +134,7 @@ func main() {
     fmt.Printf("Uniform tree of size %v has height %v\n", size, utree.Height())
     printTree3(utree)
 
-    fmt.Printf("Searched for 5 in tree, answer was %v\n", Search(utree, 5))
+    needle := Search(utree, 5)
+    fmt.Printf("Searched for 5 in tree, answer was %v with address %p\n", needle, needle)
     fmt.Printf("Searched for 11 in tree, answer was %v\n", Search(utree, 11))
 }
