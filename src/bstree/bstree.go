@@ -91,7 +91,7 @@ func (tree *BinarySearchTree) Remove() {
 
 func (tree *BinarySearchTree) Size() int {
 	switch {
-	case tree.root == nil:
+	case tree.IsEmpty():
 		return 0
 	default:
 		return tree.root.size()
@@ -100,4 +100,24 @@ func (tree *BinarySearchTree) Size() int {
 
 func (tree *BinarySearchTree) IsEmpty() bool {
 	return tree.root == nil
+}
+
+// Returns the contents of the tree, from an in-order traversal
+func (tree *BinarySearchTree) Contents() []int {
+	if tree.IsEmpty() {
+		return []int{}
+	}
+	return traverse([]int{}, tree.root)
+}
+
+// Traverses the tree in-order, adding the value of each node in-order to the `contents` slice and returning it
+func traverse(contents []int, n *node) []int {
+	if n.left != sentinel {
+		contents = traverse(contents, n.left)
+	}
+	contents = append(contents, n.value)
+	if n.right != sentinel {
+		contents = traverse(contents, n.right)
+	}
+	return contents
 }
