@@ -213,6 +213,7 @@ func (tree *BinarySearchTree) Contains(value int) bool {
 
 // Removes value from tree. If value is not already in the tree, then TODO
 func (tree *BinarySearchTree) Remove() {
+    //TODO implement
 }
 
 // Returns the number of elements stored in the tree.
