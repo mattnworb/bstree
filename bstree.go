@@ -5,8 +5,6 @@
 // The tree cannot contain duplicate items.
 package bstree
 
-//import "fmt"
-
 // A single node in the binary search tree
 type node struct {
 	value    int
@@ -14,17 +12,6 @@ type node struct {
 	right    *node
 	parent   *node
 	is_black bool
-}
-
-func (n *node) size() int {
-	size := 1
-	if n.left != nil {
-		size += n.left.size()
-	}
-	if n.right != nil {
-		size += n.right.size()
-	}
-	return size
 }
 
 func (n *node) contains(value int) bool {
@@ -43,6 +30,7 @@ func (n *node) contains(value int) bool {
 
 type BinarySearchTree struct {
 	root *node
+    size int
 }
 
 // Creates a new empty tree
@@ -55,11 +43,13 @@ func (tree *BinarySearchTree) Insert(value int) {
 	if tree.root == nil {
 		//root is always black
 		tree.root = &node{value, nil, nil, nil, true}
+        tree.size++
 	} else {
 		newNode, inserted := tree.innerInsert(tree.root, value)
 		//only rebalance tree when a new value was actually added
 		if inserted {
 			tree.fixAfterInsertion(newNode)
+            tree.size++
 		}
 	}
 }
@@ -216,12 +206,7 @@ func (tree *BinarySearchTree) Remove() {
 }
 
 func (tree *BinarySearchTree) Size() int {
-	switch {
-	case tree.IsEmpty():
-		return 0
-	default:
-		return tree.root.size()
-	}
+    return tree.size
 }
 
 func (tree *BinarySearchTree) IsEmpty() bool {
