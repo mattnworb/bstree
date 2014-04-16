@@ -128,20 +128,20 @@ func TestRedBlackInvaraints(t *testing.T) {
 func assertRedBlackInvariants(tree *BinarySearchTree, t *testing.T) {
 	// the root must be black
 	//fmt.Println("testing that root is black")
-	if !tree.root.is_black {
+	if !tree.root.isBlack {
 		t.Errorf("Tree %v should have a black root node", tree.Contents())
 	}
 
 	//fmt.Println("testing that every red node has either 0 children or 2 black children")
 	visitNodes(tree, func(n *node) {
-		if !n.is_black {
+		if !n.isBlack {
 			if (n.left != nil && n.right == nil) || (n.left == nil && n.right != nil) {
 				if !t.Failed() {
 					t.Errorf("Found a red node with only one empty child in tree %v", logTree(tree))
 				}
 			} else if n.left != nil && n.right != nil {
 				//if a red has two children, both must be black
-				if !n.left.is_black || !n.right.is_black {
+				if !n.left.isBlack || !n.right.isBlack {
 					if !t.Failed() {
 						t.Errorf("Found a red node with only one black child in tree %v", logTree(tree))
 					}
@@ -174,7 +174,7 @@ func visitNodes(tree *BinarySearchTree, visit visitor) {
 
 	for queue.Len() > 0 {
 		//pop from front of queue
-		var n *node = queue.Remove(queue.Front()).(*node)
+		n := queue.Remove(queue.Front()).(*node)
 		//fmt.Printf("At node %v\n", n)
 		visit(n)
 		if n.left != nil {
@@ -187,7 +187,7 @@ func visitNodes(tree *BinarySearchTree, visit visitor) {
 }
 
 func logTree(tree *BinarySearchTree) string {
-	var s string = fmt.Sprintf("size=%v, contents=[", tree.Size())
+	s := fmt.Sprintf("size=%v, contents=[", tree.Size())
 
 	if !tree.IsEmpty() {
 		s += logNode(tree.root, 0)
@@ -200,18 +200,17 @@ func logTree(tree *BinarySearchTree) string {
 func logNode(n *node, level int) string {
 	if n == nil { //sentinel {
 		return "NIL"
-	} else {
-		color := "black"
-		if !n.is_black {
-			color = "red"
-		}
-		spacer := ""
-		for i := 0; i < level; i++ {
-			spacer += "  "
-		}
-		return fmt.Sprintf("{value=%v, color=%v, \n%vleft=%v, \n%vright=%v}",
-			n.value, color, spacer+"  ", logNode(n.left, level+1), spacer+"  ", logNode(n.right, level+1))
 	}
+	color := "black"
+	if !n.isBlack {
+		color = "red"
+	}
+	spacer := ""
+	for i := 0; i < level; i++ {
+		spacer += "  "
+	}
+	return fmt.Sprintf("{value=%v, color=%v, \n%vleft=%v, \n%vright=%v}",
+		n.value, color, spacer+"  ", logNode(n.left, level+1), spacer+"  ", logNode(n.right, level+1))
 }
 
 // for a given node, walk the path to all descendant leaf nodes and count how
@@ -224,7 +223,7 @@ func countRedNodesInPath(n *node) map[int]int {
 }
 
 func countRedWalker(n *node, occurrences map[int]int, count int) {
-	if !n.is_black {
+	if !n.isBlack {
 		count++
 	}
 	if n.left == nil && n.right == nil {

@@ -1,4 +1,4 @@
-// A simple Binary Search Tree implementation.
+// Package bstree provides a simple Binary Search Tree implementation.
 //
 // This implementation currently only allows integers to be stored.
 //
@@ -15,11 +15,11 @@ package bstree
 
 // A single node in the binary search tree
 type node struct {
-	value    int
-	left     *node
-	right    *node
-	parent   *node
-	is_black bool
+	value   int
+	left    *node
+	right   *node
+	parent  *node
+	isBlack bool
 }
 
 func (n *node) contains(value int) bool {
@@ -36,17 +36,21 @@ func (n *node) contains(value int) bool {
 	}
 }
 
+// BinarySearchTree provides all of the tree functionality from this package.
+// Create a new empty BinarySearchTree with `bstree.New()`. Functions that
+// operate on the tree structure are defined on this type.
 type BinarySearchTree struct {
 	root *node
 	size int
 }
 
-// Creates a new empty tree
+// New creates a new empty tree
 func New() *BinarySearchTree {
 	return &BinarySearchTree{}
 }
 
-// Inserts a value to the tree
+// Insert adds a value to the tree. If the value is already stored in the tree,
+// then Insert() has no effect.
 func (tree *BinarySearchTree) Insert(value int) {
 	if tree.root == nil {
 		//root is always black
@@ -71,18 +75,16 @@ func (tree *BinarySearchTree) innerInsert(n *node, value int) (*node, bool) {
 			newNode := &node{value, nil, nil, n, false}
 			n.left = newNode
 			return newNode, true
-		} else {
-			return tree.innerInsert(n.left, value)
 		}
+		return tree.innerInsert(n.left, value)
 	} else if value > n.value {
 		if n.right == nil {
 			// add red node
 			newNode := &node{value, nil, nil, n, false}
 			n.right = newNode
 			return newNode, true
-		} else {
-			return tree.innerInsert(n.right, value)
 		}
+		return tree.innerInsert(n.right, value)
 	} else {
 		//n.value == value, don't insert a duplicate into the tree
 		return n, false
@@ -90,53 +92,53 @@ func (tree *BinarySearchTree) innerInsert(n *node, value int) (*node, bool) {
 }
 
 func (tree *BinarySearchTree) fixAfterInsertion(n *node) {
-	n.is_black = false
-	for n != nil && n != tree.root && !n.parent.is_black {
-		if parentOf(n) == safe_left(parentOf(parentOf(n))) {
-			r := safe_right(parentOf(parentOf(n)))
-			if !safe_colorOf(r) {
-				safe_setColor(parentOf(n), true)
-				safe_setColor(r, true)
-				safe_setColor(parentOf(parentOf(n)), false)
+	n.isBlack = false
+	for n != nil && n != tree.root && !n.parent.isBlack {
+		if parentOf(n) == safeLeft(parentOf(parentOf(n))) {
+			r := safeRight(parentOf(parentOf(n)))
+			if !colorOf(r) {
+				setColor(parentOf(n), true)
+				setColor(r, true)
+				setColor(parentOf(parentOf(n)), false)
 				n = parentOf(parentOf(n))
 			} else {
-				if n == safe_right(parentOf(n)) {
+				if n == safeRight(parentOf(n)) {
 					n = parentOf(n)
-					tree.rotate_left(n)
+					tree.rotateLeft(n)
 				}
-				safe_setColor(parentOf(n), true)
-				safe_setColor(parentOf(parentOf(n)), false)
-				tree.rotate_right(parentOf(parentOf(n)))
+				setColor(parentOf(n), true)
+				setColor(parentOf(parentOf(n)), false)
+				tree.rotateRight(parentOf(parentOf(n)))
 			}
 		} else {
-			l := safe_left(parentOf(parentOf(n)))
-			if !safe_colorOf(l) {
-				safe_setColor(parentOf(n), true)
-				safe_setColor(l, true)
-				safe_setColor(parentOf(parentOf(n)), false)
+			l := safeLeft(parentOf(parentOf(n)))
+			if !colorOf(l) {
+				setColor(parentOf(n), true)
+				setColor(l, true)
+				setColor(parentOf(parentOf(n)), false)
 				n = parentOf(parentOf(n))
 			} else {
-				if n == safe_left(parentOf(n)) {
+				if n == safeLeft(parentOf(n)) {
 					n = parentOf(n)
-					tree.rotate_right(n)
+					tree.rotateRight(n)
 				}
-				safe_setColor(parentOf(n), true)
-				safe_setColor(parentOf(parentOf(n)), false)
-				tree.rotate_left(parentOf(parentOf(n)))
+				setColor(parentOf(n), true)
+				setColor(parentOf(parentOf(n)), false)
+				tree.rotateLeft(parentOf(parentOf(n)))
 			}
 		}
 	}
-	tree.root.is_black = true
+	tree.root.isBlack = true
 }
 
-func safe_left(n *node) *node {
+func safeLeft(n *node) *node {
 	if n == nil {
 		return nil
 	}
 	return n.left
 }
 
-func safe_right(n *node) *node {
+func safeRight(n *node) *node {
 	if n == nil {
 		return nil
 	}
@@ -150,20 +152,20 @@ func parentOf(n *node) *node {
 	return n.parent
 }
 
-func safe_setColor(n *node, black bool) {
+func setColor(n *node, black bool) {
 	if n != nil {
-		n.is_black = black
+		n.isBlack = black
 	}
 }
 
-func safe_colorOf(n *node) bool {
+func colorOf(n *node) bool {
 	if n == nil {
 		return true
 	}
-	return n.is_black
+	return n.isBlack
 }
 
-func (tree *BinarySearchTree) rotate_left(n *node) {
+func (tree *BinarySearchTree) rotateLeft(n *node) {
 	if n != nil {
 		r := n.right
 		n.right = r.left
@@ -183,7 +185,7 @@ func (tree *BinarySearchTree) rotate_left(n *node) {
 	}
 }
 
-func (tree *BinarySearchTree) rotate_right(n *node) {
+func (tree *BinarySearchTree) rotateRight(n *node) {
 	if n != nil {
 		l := n.left
 		n.left = l.right
@@ -203,7 +205,7 @@ func (tree *BinarySearchTree) rotate_right(n *node) {
 	}
 }
 
-// Tests if the value is stored in the tree.
+// Contains tests if the value is stored in the tree.
 func (tree *BinarySearchTree) Contains(value int) bool {
 	if tree.IsEmpty() {
 		return false
@@ -211,22 +213,22 @@ func (tree *BinarySearchTree) Contains(value int) bool {
 	return tree.root.contains(value)
 }
 
-// Removes value from tree. If value is not already in the tree, then TODO
+// Remove removes value from tree. If value is not already in the tree, then TODO
 func (tree *BinarySearchTree) Remove() {
 	//TODO implement
 }
 
-// Returns the number of elements stored in the tree.
+// Size returns the number of elements stored in the tree.
 func (tree *BinarySearchTree) Size() int {
 	return tree.size
 }
 
-// Tests if the tree is empty, i.e. if Size() == 0
+// IsEmpty tests if the tree is empty, i.e. if Size() == 0
 func (tree *BinarySearchTree) IsEmpty() bool {
 	return tree.size == 0
 }
 
-// Returns the contents of the tree, from an in-order traversal
+// Contents returns the contents of the tree, from an in-order traversal
 func (tree *BinarySearchTree) Contents() []int {
 	if tree.IsEmpty() {
 		return []int{}
@@ -246,7 +248,7 @@ func traverse(contents []int, n *node) []int {
 	return contents
 }
 
-// Returns the maximum value currently stored in the tree. If the tree is
+// Max returns the maximum value currently stored in the tree. If the tree is
 // empty, returns -1.
 func (tree *BinarySearchTree) Max() int {
 	if tree.IsEmpty() {
@@ -259,7 +261,7 @@ func (tree *BinarySearchTree) Max() int {
 	return n.value
 }
 
-// Returns the minimum value currently stored in the tree. If the tree is
+// Min returns the minimum value currently stored in the tree. If the tree is
 // empty, returns -1.
 func (tree *BinarySearchTree) Min() int {
 	if tree.IsEmpty() {
