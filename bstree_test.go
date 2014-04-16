@@ -239,3 +239,50 @@ func countRedWalker(n *node, occurrences map[int]int, count int) {
 		}
 	}
 }
+
+func TestMax(t *testing.T) {
+	tree := New()
+	max := 0
+	for i := 0; i < 100; i++ {
+		newval := rand.Int()
+		tree.Insert(newval)
+		if newval > max {
+			max = newval
+		}
+	}
+
+	if ans := tree.Max(); ans != max {
+		t.Errorf("Expected tree.Max() to return %v but was %v", max, ans)
+	}
+}
+
+func TestMaxEmptyTree(t *testing.T) {
+	tree := New()
+    if ans := tree.Max(); ans != -1 {
+        t.Errorf("Expected Max() of empty tree to return -1 but was %v", ans)
+    }
+}
+
+func TestMin(t *testing.T) {
+	tree := New()
+    newval := rand.Int()
+	min := newval
+	for i := 0; i < 100; i++ {
+		tree.Insert(newval)
+		if newval < min {
+			min = newval
+		}
+		newval = rand.Int()
+	}
+
+	if ans := tree.Min(); ans != min {
+		t.Errorf("Expected tree.Min() to return %v but was %v", min, ans)
+	}
+}
+
+func TestMinEmptyTree(t *testing.T) {
+	tree := New()
+    if ans := tree.Min(); ans != -1 {
+        t.Errorf("Expected Min() of empty tree to return -1 but was %v", ans)
+    }
+}

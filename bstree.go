@@ -244,3 +244,29 @@ func traverse(contents []int, n *node) []int {
 	}
 	return contents
 }
+
+// Returns the maximum value currently stored in the tree. If the tree is
+// empty, returns -1.
+func (tree *BinarySearchTree) Max() int {
+    if tree.IsEmpty() {
+        return -1
+    }
+	n := tree.root
+	for n.right != nil {
+		n = n.right
+	}
+	return n.value
+}
+
+// Returns the minimum value currently stored in the tree. If the tree is
+// empty, returns -1.
+func (tree *BinarySearchTree) Min() int {
+    if tree.IsEmpty() {
+        return -1
+    }
+	n := tree.root
+	for n.left != nil {
+		n = n.left
+	}
+	return n.value
+}
