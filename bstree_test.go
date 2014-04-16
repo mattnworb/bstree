@@ -1,6 +1,13 @@
 package bstree
 
-import "testing"
+import (
+	//"bytes"
+	"container/list"
+	"fmt"
+	"math/rand"
+	"testing"
+	//    "time"
+)
 
 func TestContains(t *testing.T) {
 	tree := New()
@@ -9,19 +16,27 @@ func TestContains(t *testing.T) {
 		t.Errorf("Contains(1) on an empty tree should return false")
 	}
 
-	tree.Insert(1)
-	tree.Insert(2)
-	tree.Insert(3)
+	count := 10
 
-	for _, i := range []int{1, 2, 3} {
-		if !tree.Contains(i) {
-			t.Errorf("After insertion of [1, 2, 3] tree.Contains(%v) should return true", i)
+	for i := 1; i <= count; i++ {
+		tree.Insert(i)
+		t.Logf("Inserted %v, tree is now %v", i, logTree(tree))
+
+		if s := tree.Size(); s != i {
+			t.Errorf("After %v insertions expected size to be %v but got %v", i, i, s)
+		}
+
+		//test that tree contains from 1 to i
+		for j := 1; j < i; j++ {
+			if !tree.Contains(j) {
+				t.Errorf("After insertion of 1..%v, tree.Contains(%v) should return true but was false", i, j)
+			}
 		}
 	}
 
-	for _, i := range []int{4, 5, 6} {
+	for i := count + 1; i < count*2; i++ {
 		if tree.Contains(i) {
-			t.Errorf("After insertion of [1, 2, 3] tree.Contains(%v) should return false", i)
+			t.Errorf("After insertion of 1-%v tree.Contains(%v) should return false but was true", count, i)
 		}
 	}
 }
@@ -88,4 +103,141 @@ func isEqual(a []int, b []int) bool {
 		}
 	}
 	return true
+}
+
+func TestRedBlackInvaraints(t *testing.T) {
+	//rand.Seed(time.Now().UnixNano())
+	for i := 0; i < 100; i++ {
+		tree := New()
+
+		//insert a random number of random values
+		size := 1 + rand.Intn(20)
+		for count := 0; count < size; count++ {
+			num := rand.Intn(10000)
+			//fmt.Printf("adding %v to tree\n", num)
+			tree.Insert(num)
+		}
+		t.Logf("Testing with tree of size %v and contents %v", tree.Size(), tree.Contents())
+		//fmt.Printf("Testing with tree of size %v and contents %v\n", tree.Size(), logTree(tree))
+
+		assertRedBlackInvariants(tree, t)
+		if t.Failed() {
+			return
+		}
+	}
+}
+
+func assertRedBlackInvariants(tree *BinarySearchTree, t *testing.T) {
+	// the root must be black
+	//fmt.Println("testing that root is black")
+	if !tree.root.is_black {
+		t.Errorf("Tree %v should have a black root node", tree.Contents())
+	}
+
+	//fmt.Println("testing that every red node has either 0 children or 2 black children")
+	visitNodes(tree, func(n *node) {
+		if !n.is_black {
+			if (n.left != nil && n.right == nil) || (n.left == nil && n.right != nil) {
+				if !t.Failed() {
+					t.Errorf("Found a red node with only one empty child in tree %v", logTree(tree))
+				}
+			} else if n.left != nil && n.right != nil {
+				//if a red has two children, both must be black
+				if !n.left.is_black || !n.right.is_black {
+					if !t.Failed() {
+						t.Errorf("Found a red node with only one black child in tree %v", logTree(tree))
+					}
+				}
+			}
+		}
+	})
+
+	// not totally sure if this is a valid test:
+	/*
+		//fmt.Println("testing that for any given node in the tree, the path to any descendant node has the same number of red nodes")
+		visitNodes(tree, func(n *node) {
+			red_counts := countRedNodesInPath(n)
+			if len(red_counts) > 1 {
+				t.Errorf("For any given node the path to any descendant node "+
+					"should have same number of red nodes, but found counts of "+
+					"%v from node %v in tree %v", red_counts, n.value, logTree(tree))
+			}
+		})
+	*/
+}
+
+type visitor func(*node)
+
+// Visits all nodes in the tree
+func visitNodes(tree *BinarySearchTree, visit visitor) {
+	//visit the nodes in BFS order
+	queue := list.New()
+	queue.PushBack(tree.root)
+
+	for queue.Len() > 0 {
+		//pop from front of queue
+		var n *node = queue.Remove(queue.Front()).(*node)
+		//fmt.Printf("At node %v\n", n)
+		visit(n)
+		if n.left != nil {
+			queue.PushBack(n.left)
+		}
+		if n.right != nil {
+			queue.PushBack(n.right)
+		}
+	}
+}
+
+func logTree(tree *BinarySearchTree) string {
+	var s string = fmt.Sprintf("size=%v, contents=[", tree.Size())
+
+	if !tree.IsEmpty() {
+		s += logNode(tree.root, 0)
+	}
+
+	s += "]"
+	return s
+}
+
+func logNode(n *node, level int) string {
+	if n == nil { //sentinel {
+		return "NIL"
+	} else {
+		color := "black"
+		if !n.is_black {
+			color = "red"
+		}
+		spacer := ""
+		for i := 0; i < level; i++ {
+			spacer += "  "
+		}
+		return fmt.Sprintf("{value=%v, color=%v, \n%vleft=%v, \n%vright=%v}",
+			n.value, color, spacer+"  ", logNode(n.left, level+1), spacer+"  ", logNode(n.right, level+1))
+	}
+}
+
+// for a given node, walk the path to all descendant leaf nodes and count how
+// many red nodes are encountered along the way, returned as a map of `number
+// of red nodes` to `number of occurrences of this count`
+func countRedNodesInPath(n *node) map[int]int {
+	occurrences := make(map[int]int)
+	countRedWalker(n, occurrences, 0)
+	return occurrences
+}
+
+func countRedWalker(n *node, occurrences map[int]int, count int) {
+	if !n.is_black {
+		count++
+	}
+	if n.left == nil && n.right == nil {
+		//at leaf, update map
+		occurrences[count]++
+	} else {
+		if n.left != nil {
+			countRedWalker(n.left, occurrences, count)
+		}
+		if n.right != nil {
+			countRedWalker(n.right, occurrences, count)
+		}
+	}
 }

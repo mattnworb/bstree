@@ -5,22 +5,23 @@
 // The tree cannot contain duplicate items.
 package bstree
 
+//import "fmt"
+
 // A single node in the binary search tree
 type node struct {
 	value    int
 	left     *node
 	right    *node
+	parent   *node
 	is_black bool
 }
 
-var sentinel *node = &node{-1, nil, nil, true}
-
 func (n *node) size() int {
 	size := 1
-	if n.left != sentinel {
+	if n.left != nil {
 		size += n.left.size()
 	}
-	if n.right != sentinel {
+	if n.right != nil {
 		size += n.right.size()
 	}
 	return size
@@ -28,17 +29,15 @@ func (n *node) size() int {
 
 func (n *node) contains(value int) bool {
 	switch {
-	case n == sentinel:
+	case n == nil:
 		return false
-	case value == n.value:
-		return true
 	case value < n.value:
 		return n.left.contains(value)
 	case value > n.value:
 		return n.right.contains(value)
 	default:
-		//impossible
-		return false
+		// value == n.value
+		return true
 	}
 }
 
@@ -55,27 +54,154 @@ func New() *BinarySearchTree {
 func (tree *BinarySearchTree) Insert(value int) {
 	if tree.root == nil {
 		//root is always black
-		tree.root = &node{value, sentinel, sentinel, true}
+		tree.root = &node{value, nil, nil, nil, true}
 	} else {
-		innerInsert(tree.root, value)
+		newNode, inserted := tree.innerInsert(tree.root, value)
+		//only rebalance tree when a new value was actually added
+		if inserted {
+			tree.fixAfterInsertion(newNode)
+		}
 	}
 }
 
-func innerInsert(n *node, value int) {
+// inserts the value beneath node `n` (possibly calling itself recursively),
+// returning the new node struct when done.
+func (tree *BinarySearchTree) innerInsert(n *node, value int) (*node, bool) {
 	if value < n.value {
-		if n.left == sentinel {
+		if n.left == nil {
 			// add red node
-			n.left = &node{value, sentinel, sentinel, false}
+			newNode := &node{value, nil, nil, n, false}
+			n.left = newNode
+			return newNode, true
 		} else {
-			innerInsert(n.left, value)
+			return tree.innerInsert(n.left, value)
 		}
 	} else if value > n.value {
-		if n.right == sentinel {
+		if n.right == nil {
 			// add red node
-			n.right = &node{value, sentinel, sentinel, false}
+			newNode := &node{value, nil, nil, n, false}
+			n.right = newNode
+			return newNode, true
 		} else {
-			innerInsert(n.right, value)
+			return tree.innerInsert(n.right, value)
 		}
+	} else {
+		//n.value == value, don't insert a duplicate into the tree
+		return n, false
+	}
+}
+
+func (tree *BinarySearchTree) fixAfterInsertion(n *node) {
+	n.is_black = false
+	for n != nil && n != tree.root && !n.parent.is_black {
+		if parentOf(n) == safe_left(parentOf(parentOf(n))) {
+			r := safe_right(parentOf(parentOf(n)))
+			if !safe_colorOf(r) {
+				safe_setColor(parentOf(n), true)
+				safe_setColor(r, true)
+				safe_setColor(parentOf(parentOf(n)), false)
+				n = parentOf(parentOf(n))
+			} else {
+				if n == safe_right(parentOf(n)) {
+					n = parentOf(n)
+					tree.rotate_left(n)
+				}
+				safe_setColor(parentOf(n), true)
+				safe_setColor(parentOf(parentOf(n)), false)
+				tree.rotate_right(parentOf(parentOf(n)))
+			}
+		} else {
+			l := safe_left(parentOf(parentOf(n)))
+			if !safe_colorOf(l) {
+				safe_setColor(parentOf(n), true)
+				safe_setColor(l, true)
+				safe_setColor(parentOf(parentOf(n)), false)
+				n = parentOf(parentOf(n))
+			} else {
+				if n == safe_left(parentOf(n)) {
+					n = parentOf(n)
+					tree.rotate_right(n)
+				}
+				safe_setColor(parentOf(n), true)
+				safe_setColor(parentOf(parentOf(n)), false)
+				tree.rotate_left(parentOf(parentOf(n)))
+			}
+		}
+	}
+	tree.root.is_black = true
+}
+
+func safe_left(n *node) *node {
+	if n == nil {
+		return nil
+	}
+	return n.left
+}
+
+func safe_right(n *node) *node {
+	if n == nil {
+		return nil
+	}
+	return n.right
+}
+
+func parentOf(n *node) *node {
+	if n == nil {
+		return nil
+	}
+	return n.parent
+}
+
+func safe_setColor(n *node, black bool) {
+	if n != nil {
+		n.is_black = black
+	}
+}
+
+func safe_colorOf(n *node) bool {
+	if n == nil {
+		return true
+	}
+	return n.is_black
+}
+
+func (tree *BinarySearchTree) rotate_left(n *node) {
+	if n != nil {
+		r := n.right
+		n.right = r.left
+		if r.left != nil {
+			r.left.parent = n
+		}
+		r.parent = n.parent
+		if n.parent == nil {
+			tree.root = r
+		} else if n.parent.left == n {
+			n.parent.left = r
+		} else {
+			n.parent.right = r
+		}
+		r.left = n
+		n.parent = r
+	}
+}
+
+func (tree *BinarySearchTree) rotate_right(n *node) {
+	if n != nil {
+		l := n.left
+		n.left = l.right
+		if l.right != nil {
+			l.right.parent = n
+		}
+		l.parent = n.parent
+		if n.parent == nil {
+			tree.root = l
+		} else if n.parent.right == n {
+			n.parent.right = l
+		} else {
+			n.parent.left = l
+		}
+		l.right = n
+		n.parent = l
 	}
 }
 
@@ -112,11 +238,11 @@ func (tree *BinarySearchTree) Contents() []int {
 
 // Traverses the tree in-order, adding the value of each node in-order to the `contents` slice and returning it
 func traverse(contents []int, n *node) []int {
-	if n.left != sentinel {
+	if n.left != nil {
 		contents = traverse(contents, n.left)
 	}
 	contents = append(contents, n.value)
-	if n.right != sentinel {
+	if n.right != nil {
 		contents = traverse(contents, n.right)
 	}
 	return contents
