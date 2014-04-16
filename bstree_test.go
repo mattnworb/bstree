@@ -258,14 +258,14 @@ func TestMax(t *testing.T) {
 
 func TestMaxEmptyTree(t *testing.T) {
 	tree := New()
-    if ans := tree.Max(); ans != -1 {
-        t.Errorf("Expected Max() of empty tree to return -1 but was %v", ans)
-    }
+	if ans := tree.Max(); ans != -1 {
+		t.Errorf("Expected Max() of empty tree to return -1 but was %v", ans)
+	}
 }
 
 func TestMin(t *testing.T) {
 	tree := New()
-    newval := rand.Int()
+	newval := rand.Int()
 	min := newval
 	for i := 0; i < 100; i++ {
 		tree.Insert(newval)
@@ -282,7 +282,7 @@ func TestMin(t *testing.T) {
 
 func TestMinEmptyTree(t *testing.T) {
 	tree := New()
-    if ans := tree.Min(); ans != -1 {
-        t.Errorf("Expected Min() of empty tree to return -1 but was %v", ans)
-    }
+	if ans := tree.Min(); ans != -1 {
+		t.Errorf("Expected Min() of empty tree to return -1 but was %v", ans)
+	}
 }

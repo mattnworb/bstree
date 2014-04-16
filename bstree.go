@@ -213,7 +213,7 @@ func (tree *BinarySearchTree) Contains(value int) bool {
 
 // Removes value from tree. If value is not already in the tree, then TODO
 func (tree *BinarySearchTree) Remove() {
-    //TODO implement
+	//TODO implement
 }
 
 // Returns the number of elements stored in the tree.
@@ -249,9 +249,9 @@ func traverse(contents []int, n *node) []int {
 // Returns the maximum value currently stored in the tree. If the tree is
 // empty, returns -1.
 func (tree *BinarySearchTree) Max() int {
-    if tree.IsEmpty() {
-        return -1
-    }
+	if tree.IsEmpty() {
+		return -1
+	}
 	n := tree.root
 	for n.right != nil {
 		n = n.right
@@ -262,9 +262,9 @@ func (tree *BinarySearchTree) Max() int {
 // Returns the minimum value currently stored in the tree. If the tree is
 // empty, returns -1.
 func (tree *BinarySearchTree) Min() int {
-    if tree.IsEmpty() {
-        return -1
-    }
+	if tree.IsEmpty() {
+		return -1
+	}
 	n := tree.root
 	for n.left != nil {
 		n = n.left
