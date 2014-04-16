@@ -1,12 +1,10 @@
 package bstree
 
 import (
-	//"bytes"
 	"container/list"
 	"fmt"
 	"math/rand"
 	"testing"
-	//    "time"
 )
 
 func TestContains(t *testing.T) {

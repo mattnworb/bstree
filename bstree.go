@@ -2,7 +2,15 @@
 //
 // This implementation currently only allows integers to be stored.
 //
-// The tree cannot contain duplicate items.
+// The tree cannot contain duplicate items. Adding an integer that is already
+// stored in the tree results in no change being made to the tree (the result
+// of Size() stays the same).
+//
+// This implementation is not safe for concurrent access.
+//
+// Internally, this package implements a red-black tree (with implementation
+// heavily borrowed from java.util.TreeMap). This allows bstree to offer O(log
+// n) access for inserts, removals, and searches in the average case.
 package bstree
 
 // A single node in the binary search tree
@@ -30,7 +38,7 @@ func (n *node) contains(value int) bool {
 
 type BinarySearchTree struct {
 	root *node
-    size int
+	size int
 }
 
 // Creates a new empty tree
@@ -43,13 +51,13 @@ func (tree *BinarySearchTree) Insert(value int) {
 	if tree.root == nil {
 		//root is always black
 		tree.root = &node{value, nil, nil, nil, true}
-        tree.size++
+		tree.size++
 	} else {
 		newNode, inserted := tree.innerInsert(tree.root, value)
 		//only rebalance tree when a new value was actually added
 		if inserted {
 			tree.fixAfterInsertion(newNode)
-            tree.size++
+			tree.size++
 		}
 	}
 }
@@ -195,6 +203,7 @@ func (tree *BinarySearchTree) rotate_right(n *node) {
 	}
 }
 
+// Tests if the value is stored in the tree.
 func (tree *BinarySearchTree) Contains(value int) bool {
 	if tree.IsEmpty() {
 		return false
@@ -202,15 +211,18 @@ func (tree *BinarySearchTree) Contains(value int) bool {
 	return tree.root.contains(value)
 }
 
+// Removes value from tree. If value is not already in the tree, then TODO
 func (tree *BinarySearchTree) Remove() {
 }
 
+// Returns the number of elements stored in the tree.
 func (tree *BinarySearchTree) Size() int {
-    return tree.size
+	return tree.size
 }
 
+// Tests if the tree is empty, i.e. if Size() == 0
 func (tree *BinarySearchTree) IsEmpty() bool {
-	return tree.root == nil
+	return tree.size == 0
 }
 
 // Returns the contents of the tree, from an in-order traversal
